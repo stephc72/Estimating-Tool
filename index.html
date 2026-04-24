@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>concept72 — Estimate Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #236192;
+    --accent: #0082BA;
+    --green: #046A38;
+    --grey: #707372;
+    --light-grey: #F4F6F9;
+    --dark: #1A1A1A;
+    --white: #FFFFFF;
+    --border: #D8E4EE;
+    --row-alt: #EAF3FA;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F0F4F8;
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--blue);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--green);
+  }
+
+  .wordmark {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+  .wordmark span.c { color: var(--accent); font-weight: 400; }
+  .wordmark span.n { color: #B0BEC5; font-weight: 700; }
+
+  .tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--blue);
+    padding: 0 32px;
+    gap: 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .tab-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    padding: 12px 18px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.85); }
+  .tab-btn.active {
+    color: #FFFFFF;
+    border-bottom-color: var(--accent);
+  }
+
+  /* CONTENT */
+  .content { padding: 28px 32px; max-width: 1100px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* SECTION HEADERS */
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--blue);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--green);
+    border-radius: 2px;
+  }
+
+  /* CALCULATOR SECTION */
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 700px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--grey);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    margin-top: 12px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="number"], select, input[type="text"] {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--dark);
+    background: #FAFCFE;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); background: #fff; }
+
+  .btn-calc {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-calc:hover { background: var(--accent); }
+
+  /* RESULTS */
+  .results-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .results-header {
+    background: var(--blue);
+    padding: 14px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: white;
+  }
+
+  .results-body { padding: 20px; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { color: var(--grey); font-size: 12px; }
+  .result-value { font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--dark); }
+  .result-value.highlight { color: var(--blue); font-size: 15px; }
+  .result-value.total { color: var(--green); font-size: 18px; font-weight: 700; }
+
+  .divider-row {
+    border-top: 2px solid var(--blue);
+    margin: 8px 0;
+  }
+
+  /* SUPPLIES GRID */
+  .supplies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .supply-item {
+    background: var(--light-grey);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    text-align: center;
+  }
+  .supply-item.na { opacity: 0.4; }
+  .supply-name { font-size: 10px; font-weight: 600; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .supply-qty { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; color: var(--blue); }
+  .supply-unit { font-size: 10px; color: var(--grey); margin-top: 2px; }
+
+  .note-bar {
+    background: var(--light-grey);
+    border-left: 3px solid var(--green);
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--grey);
+    margin-top: 14px;
+    border-radius: 0 3px 3px 0;
+    line-height: 1.7;
+  }
+
+  .warn-bar {
+    background: #FFF8E1;
+    border-left: 3px solid #F59E0B;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #92400E;
+    margin-top: 8px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* PRICING TABLE */
+  .pricing-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: white;
+    color: var(--grey);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--blue);
+    color: white;
+    border-color: var(--blue);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  thead tr {
+    background: var(--blue);
+  }
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: white;
+  }
+
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  tbody tr:hover { background: #D6EAF5; }
+
+  tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--dark);
+  }
+
+  .cat-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .cat-landscape { background: #E8F5E9; color: #2E7D32; }
+  .cat-architectural { background: #E3F2FD; color: var(--blue); }
+  .cat-control { background: #F3E5F5; color: #6A1B9A; }
+
+  .price-cell {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .hrs-cell { color: var(--grey); font-size: 11px; }
+
+  .finish-brass {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #B8860B;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .finish-black {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1A1A1A;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .finish-both {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #B8860B 50%, #1A1A1A 50%);
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* DOT LEGEND */
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+
+  .legend-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dot-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .legend-text { flex: 1; }
+  .legend-fixture {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .legend-app {
+    font-size: 11px;
+    color: var(--grey);
+    margin-top: 2px;
+  }
+  .legend-price {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  /* BULB REFERENCE */
+  .bulb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+
+  .bulb-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+
+  .bulb-app {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .bulb-spec {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .spec-badge {
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .spec-w { background: #FFF3E0; color: #E65100; }
+  .spec-deg { background: #E3F2FD; color: var(--blue); }
+
+  /* TIER TABLE */
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  @media (max-width: 700px) { .tier-grid { grid-template-columns: 1fr 1fr; } }
+
+  .tier-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+  }
+  .tier-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--blue);
+  }
+  .tier-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 4px 0;
+  }
+  .tier-size { font-size: 10px; color: var(--grey); margin-bottom: 8px; }
+  .tier-pct {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .tier-pct-label { font-size: 9px; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* WIRE REFERENCE */
+  .wire-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 16px;
+  }
+  @media (max-width: 600px) { .wire-grid { grid-template-columns: 1fr; } }
+
+  .hidden { display: none; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 10px;
+    color: var(--grey);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="wordmark"><span class="c">concept</span><span class="n">72</span></div>
+    <div class="tagline">Outdoor Lighting & Sound Crafted For Refined Ambience</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-family:Montserrat;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1.5px;text-transform:uppercase">Estimate Calculator</div>
+    <div style="font-family:Inter;font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px">Field Reference & Pricing Tool</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('calculator',this)">Calculator</button>
+  <button class="tab-btn" onclick="showTab('pricing',this)">Pricing</button>
+  <button class="tab-btn" onclick="showTab('legend',this)">Dot Legend</button>
+  <button class="tab-btn" onclick="showTab('bulbs',this)">Bulbs & Wire</button>
+</div>
+
+<div class="content">
+
+  <!-- CALCULATOR TAB -->
+  <div id="tab-calculator" class="section active">
+    <div class="section-title">Work Area Estimate Calculator</div>
+
+    <div class="calc-grid">
+      <div class="card">
+        <div class="card-title">Work Area Details</div>
+
+        <label>Work Area Name</label>
+        <input type="text" id="waName" placeholder="e.g. Front Yard Landscape Lighting">
+
+        <label>Work Area Type</label>
+        <select id="waType">
+          <option value="landscape">Landscape</option>
+          <option value="architectural">Architectural</option>
+          <option value="mixed">Mixed (Landscape + Architectural)</option>
+          <option value="control">Control System Only</option>
+        </select>
+
+        <label>Property Size Tier</label>
+        <select id="propTier">
+          <option value="A" selected>Standard — Up to ~20,000 sq ft — No add-on</option>
+          <option value="B">Large — ~20,000–35,000 sq ft — +3%</option>
+          <option value="C">Extra Large — ~35,000–50,000 sq ft — +5%</option>
+          <option value="D">Estate — 50,000+ sq ft — Custom</option>
+        </select>
+
+        <label>Fixture Finish</label>
+        <select id="finish">
+          <option value="brass">Brass (Standard)</option>
+          <option value="black">Black (Black pergola / gutter / soffit)</option>
+          <option value="mixed">Mixed — Brass & Black</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fixture Count By Type</div>
+
+        <label>Bullet Up-Lights — Ground (Garden/Mulch) @ $325</label>
+        <input type="number" id="f1" value="0" min="0">
+
+        <label>Bullet Up-Lights — Tree Mounted @ $350</label>
+        <input type="number" id="f2" value="0" min="0">
+
+        <label>Bullet Up-Lights — Elevated / Above Snow Line @ $375</label>
+        <input type="number" id="f3" value="0" min="0">
+
+        <label>Well-Recessed Up-Lights @ $350</label>
+        <input type="number" id="f4" value="0" min="0">
+
+        <label>Architectural Down-Lights — House @ $400</label>
+        <input type="number" id="f5" value="0" min="0">
+
+        <label>Architectural Down-Lights — Shed @ $350</label>
+        <input type="number" id="f6" value="0" min="0">
+
+        <label>Architectural Down-Lights — Pergola @ $390</label>
+        <input type="number" id="f7" value="0" min="0">
+
+        <label>Down-Moonlights @ $380</label>
+        <input type="number" id="f8" value="0" min="0">
+
+        <label>Path Lights @ $365</label>
+        <input type="number" id="f9" value="0" min="0">
+
+        <label>Flush Mount Core-Drilled @ $325</label>
+        <input type="number" id="f10" value="0" min="0">
+
+        <label>Ledge Lights @ $335</label>
+        <input type="number" id="f11" value="0" min="0">
+
+        <label>Sconce Lights @ $385</label>
+        <input type="number" id="f12" value="0" min="0">
+
+        <label>Islander Tiki 36" @ $800</label>
+        <input type="number" id="f13" value="0" min="0">
+
+        <label>Islander Tiki 48" @ $900</label>
+        <input type="number" id="f14" value="0" min="0">
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Control System</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
+        <div>
+          <label>SMRTscape Gateway @ $450</label>
+          <input type="number" id="c1" value="0" min="0">
+        </div>
+        <div>
+          <label>SMRTscape LPCU @ $500</label>
+          <input type="number" id="c2" value="0" min="0">
+        </div>
+        <div>
+          <label>WiFi Socket @ $350</label>
+          <input type="number" id="c3" value="0" min="0">
+        </div>
+        <div>
+          <label>PhotoCell @ $150</label>
+          <input type="number" id="c4" value="0" min="0">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">Calculate Work Area Estimate</button>
+
+    <div id="results-section" style="margin-top:24px;display:none">
+      <div class="results-panel">
+        <div class="results-header" id="results-title">Work Area Results</div>
+        <div class="results-body">
+          <div id="fixture-breakdown"></div>
+          <div class="divider-row"></div>
+          <div id="totals-section"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="section-title">Job Supplies</div>
+        <div id="supplies-output"></div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="section-title">Wire Estimate</div>
+        <div id="wire-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING TAB -->
+  <div id="tab-pricing" class="section">
+    <div class="section-title">Fixture Pricing Master Reference</div>
+    <div class="pricing-filter">
+      <button class="filter-btn active" onclick="filterPricing('all',this)">All</button>
+      <button class="filter-btn" onclick="filterPricing('Landscape',this)">Landscape</button>
+      <button class="filter-btn" onclick="filterPricing('Architectural',this)">Architectural</button>
+      <button class="filter-btn" onclick="filterPricing('Control System',this)">Control Systems</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="pricing-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Fixture Family</th>
+          <th>Application</th>
+          <th>Finish</th>
+          <th>Sell Price</th>
+          <th>Install Hrs</th>
+        </tr>
+      </thead>
+      <tbody id="pricing-body"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- DOT LEGEND TAB -->
+  <div id="tab-legend" class="section">
+    <div class="section-title">Site Markup Dot Legend</div>
+    <p style="font-size:12px;color:var(--grey);margin-bottom:20px;line-height:1.6">Place colored dots on site visit photos to indicate fixture placement. White lines show beam direction and spread. The dot color tells the team exactly which fixture is specified.</p>
+    <div class="legend-grid" id="legend-grid"></div>
+  </div>
+
+  <!-- BULBS & WIRE TAB -->
+  <div id="tab-bulbs" class="section">
+    <div class="section-title">Bulb Specifications — Standard Defaults</div>
+    <div class="bulb-grid" id="bulb-grid"></div>
+
+    <div style="margin-top:32px">
+      <div class="section-title">Wire Reference</div>
+      <div class="wire-grid">
+        <div class="card">
+          <div class="card-title">12/2 Wire — Underground Main Runs</div>
+          <table>
+            <thead><tr><th>Total Fixtures</th><th>12/2 Rolls (500ft)</th></tr></thead>
+            <tbody>
+              <tr><td>Up to 10</td><td class="price-cell">0.25 roll</td></tr>
+              <tr><td>11–20</td><td class="price-cell">0.50 roll</td></tr>
+              <tr><td>21–40</td><td class="price-cell">1.00 roll</td></tr>
+              <tr><td>41–80</td><td class="price-cell">2.00 rolls</td></tr>
+              <tr><td>80+</td><td class="price-cell">3.00 rolls</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">16/2 Wire — Above Ground Short Runs Only</div>
+          <table>
+            <thead><tr><th>Application</th><th>16/2 Amount</th></tr></thead>
+            <tbody>
+              <tr><td>Shed</td><td class="price-cell">0.25 roll max</td></tr>
+              <tr><td>Pergola</td><td class="price-cell">0.25 roll</td></tr>
+              <tr><td>House</td><td class="price-cell">0.5 – 1.0 roll</td></tr>
+              <tr><td>Per tree with moonlights</td><td class="price-cell">~40 ft per tree</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <div class="section-title">Property Size Tier Modifier</div>
+      <p style="font-size:12px;color:var(--grey);margin-bottom:4px">Wire & labour add-on applied to fixture subtotal</p>
+      <div class="tier-grid" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="tier-item">
+          <div class="tier-label">S</div>
+          <div class="tier-name">Standard</div>
+          <div class="tier-size">Up to ~20,000 sq ft</div>
+          <div class="tier-pct">+0%</div>
+          <div class="tier-pct-label">base price is the price</div>
+        </div>
+        <div class="tier-item">
+          <div class="tier-label">L</div>
+          <div class="tier-name">Large</div>
+          <div class="tier-size">~20,000–35,000 sq ft</div>
+          <div class="tier-pct">+3%</div>
+          <div class="tier-pct-label">wire & labour add-on</div>
+        </div>
+        <div class="tier-item">
+          <div class="tier-label">XL</div>
+          <div class="tier-name">Extra Large</div>
+          <div class="tier-size">~35,000–50,000 sq ft</div>
+          <div class="tier-pct">+5%</div>
+          <div class="tier-pct-label">wire & labour add-on</div>
+        </div>
+        <div class="tier-item">
+          <div class="tier-label">E</div>
+          <div class="tier-name">Estate</div>
+          <div class="tier-size">50,000+ sq ft</div>
+          <div class="tier-pct" style="font-size:13px">Custom</div>
+          <div class="tier-pct-label">conversation with Steph</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span style="color:#0082BA;font-weight:400">concept</span><span style="color:#707372;font-weight:700">72</span>
+  &nbsp;·&nbsp; concept72.ca &nbsp;·&nbsp; steph@concept72.ca &nbsp;·&nbsp; (514) 821-8326
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+
+const PRICING = [
+  {cat:'Landscape',fixture:'Up Bullet-Light 2101',app:'Garden or Mulch',finish:'both',price:325,hrs:0.25},
+  {cat:'Landscape',fixture:'Up Bullet-Light 2101',app:'Tree Mounted',finish:'both',price:350,hrs:0.25},
+  {cat:'Landscape',fixture:'Up Bullet-Light 2101',app:'River Rock',finish:'both',price:335,hrs:0.25},
+  {cat:'Landscape',fixture:'Up Bullet-Light MR11',app:'Garden or Mulch',finish:'both',price:340,hrs:0.25},
+  {cat:'Landscape',fixture:'Down-Moonlight 2101',app:'Tree Mounted',finish:'brass',price:375,hrs:0.50},
+  {cat:'Landscape',fixture:'Down-Moonlight 2102',app:'Tree Mounted',finish:'brass',price:385,hrs:0.50},
+  {cat:'Landscape',fixture:'Path Lights',app:'Garden',finish:'both',price:365,hrs:0.25},
+  {cat:'Landscape',fixture:'Well-Recessed Up-Light',app:'Grass',finish:'both',price:350,hrs:0.50},
+  {cat:'Landscape',fixture:'Well-Recessed Up-Light',app:'River Rock',finish:'both',price:360,hrs:0.50},
+  {cat:'Landscape',fixture:'Flush Mount Core-Drilled',app:'Driveway or Walkway',finish:'both',price:325,hrs:0.50},
+  {cat:'Landscape',fixture:'Ledge-Light',app:'Retaining Wall',finish:'both',price:325,hrs:0.25},
+  {cat:'Landscape',fixture:'Ledge-Light',app:'Garden Bed-Wall',finish:'both',price:325,hrs:0.25},
+  {cat:'Landscape',fixture:'Ledge-Light',app:'Steps-Staircase',finish:'both',price:350,hrs:0.25},
+  {cat:'Landscape',fixture:'Post Lights',app:'Wood Fence',finish:'black',price:325,hrs:0.50},
+  {cat:'Landscape',fixture:'Post Lights',app:'Metal Fence',finish:'black',price:325,hrs:0.50},
+  {cat:'Landscape',fixture:'Sconce Light',app:'Fence / Wall',finish:'brass',price:385,hrs:0.50},
+  {cat:'Landscape',fixture:'Bullet Light — Fence Mounted',app:'Fence / Treeline',finish:'both',price:365,hrs:0.25},
+  {cat:'Landscape',fixture:'Islander Tiki Light 36"',app:'Sitting Area',finish:'brass',price:800,hrs:0.50},
+  {cat:'Landscape',fixture:'Islander Tiki Light 48"',app:'Sitting Area',finish:'brass',price:900,hrs:0.50},
+  {cat:'Architectural',fixture:'Down Light 2101',app:'House',finish:'both',price:400,hrs:0.75},
+  {cat:'Architectural',fixture:'Down Light 2101',app:'Shed',finish:'both',price:350,hrs:0.50},
+  {cat:'Architectural',fixture:'Down Light 2101',app:'Pergola',finish:'both',price:390,hrs:0.50},
+  {cat:'Architectural',fixture:'Down Light MR11',app:'House',finish:'both',price:425,hrs:0.75},
+  {cat:'Architectural',fixture:'Down Light MR11',app:'Shed',finish:'both',price:360,hrs:0.25},
+  {cat:'Architectural',fixture:'Down Light MR11',app:'Pergola',finish:'both',price:400,hrs:0.50},
+  {cat:'Architectural',fixture:'Hanging Light-Decorative',app:'Pergola',finish:'both',price:375,hrs:0.50},
+  {cat:'Control System',fixture:'SMRTscape Gateway',app:'To Internet',finish:'—',price:450,hrs:0.25},
+  {cat:'Control System',fixture:'SMRTscape LPCU',app:'To Transformer',finish:'—',price:500,hrs:0.25},
+  {cat:'Control System',fixture:'WiFi Socket',app:'To Transformer',finish:'—',price:350,hrs:0.25},
+  {cat:'Control System',fixture:'PhotoCell',app:'To Transformer',finish:'—',price:150,hrs:0.10},
+];
+
+const LEGEND = [
+  {color:'#E53E3E',name:'Red',fixture:'Bullet Up-Light',app:'Ground level · mulch / garden / rock',price:'$325–375'},
+  {color:'#2563EB',name:'Blue',fixture:'Well-Recessed Up-Light',app:'In-ground · grass / mulch bed',price:'$350–375'},
+  {color:'#7C3AED',name:'Purple',fixture:'Flush Mount Core-Drilled',app:'Paved · driveway / walkway / pavers',price:'$325'},
+  {color:'#EA7C1E',name:'Orange',fixture:'Bullet Up-Light — Elevated',app:'Bracket-mounted · above snow line',price:'$375'},
+  {color:'#0EA5C8',name:'Teal',fixture:'Architectural Down-Light',app:'Fascia / soffit / gutter edge',price:'$350–450'},
+  {color:'#16A34A',name:'Green',fixture:'Path Light',app:'Garden path · walkway edge',price:'$365'},
+  {color:'#DB2777',name:'Pink',fixture:'Ledge Light',app:'Retaining wall · steps · garden wall',price:'$325–350'},
+  {color:'#9CA3AF',name:'White/Grey',fixture:'Post Light',app:'Wood or metal fence',price:'$325'},
+  {color:'#EAB308',name:'Yellow',fixture:'Down-Moonlight',app:'Tree-mounted · shines downward',price:'$375–385'},
+  {color:'#707372',name:'Grey',fixture:'Sconce Light',app:'Fence / wall · up & down lighting',price:'$385'},
+  {color:'#1B3A6B',name:'Navy',fixture:'Islander Tiki Light',app:'Freestanding · sitting area · 36" or 48"',price:'$800–900'},
+];
+
+const BULBS = [
+  {app:'Architectural Down-Light — House',w:'3W',deg:'30°'},
+  {app:'Architectural Down-Light — Shed',w:'3W',deg:'45°'},
+  {app:'Architectural Down-Light — Pergola',w:'3W',deg:'15°'},
+  {app:'Down-Moonlight — Tree Mounted',w:'4W',deg:'60°'},
+  {app:'Well-Recessed Up-Light',w:'4W',deg:'45°'},
+  {app:'Bullet Up-Light — Small Trees',w:'3W',deg:'45°'},
+  {app:'Bullet Up-Light — Large Trees / Boulders',w:'4W',deg:'45°'},
+];
+
+// ─── RENDER PRICING TABLE ───────────────────────────────────────────────────
+function renderPricing(filter) {
+  const tbody = document.getElementById('pricing-body');
+  const rows = filter === 'all' ? PRICING : PRICING.filter(r => r.cat === filter);
+  tbody.innerHTML = rows.map((r,i) => {
+    const finishIcon = r.finish === 'brass'
+      ? '<span class="finish-brass"></span>Brass only'
+      : r.finish === 'black'
+        ? '<span class="finish-black"></span>Black only'
+        : r.finish === 'both'
+          ? '<span class="finish-both"></span>Brass / Black'
+          : r.finish;
+    return `<tr>
+      <td><span class="cat-badge cat-${r.cat.toLowerCase().replace(' ','-')}">${r.cat}</span></td>
+      <td style="font-weight:600">${r.fixture}</td>
+      <td>${r.app}</td>
+      <td style="font-size:11px">${finishIcon}</td>
+      <td class="price-cell">$${r.price}</td>
+      <td class="hrs-cell">${r.hrs} hr</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterPricing(f, el) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPricing(f);
+}
+
+// ─── RENDER LEGEND ──────────────────────────────────────────────────────────
+function renderLegend() {
+  document.getElementById('legend-grid').innerHTML = LEGEND.map(l => `
+    <div class="legend-item">
+      <div class="dot-circle" style="background:${l.color}"></div>
+      <div class="legend-text">
+        <div class="legend-fixture">${l.fixture}</div>
+        <div class="legend-app">${l.app}</div>
+      </div>
+      <div class="legend-price">${l.price}</div>
+    </div>
+  `).join('');
+}
+
+// ─── RENDER BULBS ───────────────────────────────────────────────────────────
+function renderBulbs() {
+  document.getElementById('bulb-grid').innerHTML = BULBS.map(b => `
+    <div class="bulb-item">
+      <div class="bulb-app">${b.app}</div>
+      <div class="bulb-spec">
+        <span class="spec-badge spec-w">${b.w}</span>
+        <span class="spec-badge spec-deg">${b.deg}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── CALCULATE ──────────────────────────────────────────────────────────────
+function calculate() {
+  const waName = document.getElementById('waName').value || 'Work Area';
+  const waType = document.getElementById('waType').value;
+  const tier = document.getElementById('propTier').value;
+  const finish = document.getElementById('finish').value;
+
+  const TIER_PCT = {A:0, B:0.03, C:0.05, D:null};
+
+  // Fixture inputs
+  const fixtures = [
+    {label:'Bullet Up-Lights — Ground (Garden/Mulch)', qty:+document.getElementById('f1').value, price:325, type:'landscape'},
+    {label:'Bullet Up-Lights — Tree Mounted', qty:+document.getElementById('f2').value, price:350, type:'landscape'},
+    {label:'Bullet Up-Lights — Elevated / Above Snow Line', qty:+document.getElementById('f3').value, price:375, type:'above-ground'},
+    {label:'Well-Recessed Up-Lights', qty:+document.getElementById('f4').value, price:350, type:'landscape'},
+    {label:'Architectural Down-Lights — House', qty:+document.getElementById('f5').value, price:400, type:'architectural'},
+    {label:'Architectural Down-Lights — Shed', qty:+document.getElementById('f6').value, price:350, type:'architectural'},
+    {label:'Architectural Down-Lights — Pergola', qty:+document.getElementById('f7').value, price:390, type:'architectural'},
+    {label:'Down-Moonlights', qty:+document.getElementById('f8').value, price:380, type:'moonlight'},
+    {label:'Path Lights', qty:+document.getElementById('f9').value, price:365, type:'landscape'},
+    {label:'Flush Mount Core-Drilled', qty:+document.getElementById('f10').value, price:325, type:'landscape'},
+    {label:'Ledge Lights', qty:+document.getElementById('f11').value, price:335, type:'landscape'},
+    {label:'Sconce Lights', qty:+document.getElementById('f12').value, price:385, type:'architectural'},
+    {label:'Islander Tiki 36"', qty:+document.getElementById('f13').value, price:800, type:'landscape'},
+    {label:'Islander Tiki 48"', qty:+document.getElementById('f14').value, price:900, type:'landscape'},
+  ];
+
+  const controls = [
+    {label:'SMRTscape Gateway', qty:+document.getElementById('c1').value, price:450},
+    {label:'SMRTscape LPCU', qty:+document.getElementById('c2').value, price:500},
+    {label:'WiFi Socket', qty:+document.getElementById('c3').value, price:350},
+    {label:'PhotoCell', qty:+document.getElementById('c4').value, price:150},
+  ];
+
+  const activeFixtures = fixtures.filter(f => f.qty > 0);
+  const activeControls = controls.filter(c => c.qty > 0);
+  const totalFixtures = activeFixtures.reduce((s,f) => s + f.qty, 0);
+
+  if (totalFixtures === 0 && activeControls.reduce((s,c) => s+c.qty,0) === 0) {
+    alert('Please enter at least one fixture quantity.');
+    return;
+  }
+
+  const fixtureSubtotal = activeFixtures.reduce((s,f) => s + f.qty * f.price, 0);
+  const controlSubtotal = activeControls.reduce((s,c) => s + c.qty * c.price, 0);
+
+  const tierPct = TIER_PCT[tier];
+  const wireLabourAddon = tierPct !== null ? fixtureSubtotal * tierPct : 0;
+  const total = fixtureSubtotal + controlSubtotal + wireLabourAddon;
+
+  // BREAKDOWN HTML
+  document.getElementById('results-title').textContent = waName + ' — Results';
+
+  let breakdownHTML = '';
+  if (activeFixtures.length > 0) {
+    breakdownHTML += `<div style="font-family:Montserrat;font-size:10px;font-weight:700;color:var(--grey);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Fixtures</div>`;
+    activeFixtures.forEach(f => {
+      breakdownHTML += `<div class="result-row">
+        <span class="result-label">${f.label} × ${f.qty}</span>
+        <span class="result-value">$${(f.qty * f.price).toLocaleString()}</span>
+      </div>`;
+    });
+    breakdownHTML += `<div class="result-row">
+      <span class="result-label" style="font-weight:600;color:var(--dark)">Fixture Subtotal (${totalFixtures} fixtures)</span>
+      <span class="result-value highlight">$${fixtureSubtotal.toLocaleString()}</span>
+    </div>`;
+  }
+
+  if (activeControls.length > 0) {
+    breakdownHTML += `<div style="font-family:Montserrat;font-size:10px;font-weight:700;color:var(--grey);letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 10px">Control System</div>`;
+    activeControls.forEach(c => {
+      breakdownHTML += `<div class="result-row">
+        <span class="result-label">${c.label} × ${c.qty}</span>
+        <span class="result-value">$${(c.qty * c.price).toLocaleString()}</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('fixture-breakdown').innerHTML = breakdownHTML;
+
+  let totalsHTML = '';
+  if (tierPct !== null && tierPct > 0) {
+    totalsHTML += `<div class="result-row">
+      <span class="result-label">Wire & Labour Modifier — ${tier === 'B' ? 'Large +3%' : 'Extra Large +5%'}</span>
+      <span class="result-value">$${Math.round(wireLabourAddon).toLocaleString()}</span>
+    </div>`;
+  } else if (tierPct === null) {
+    totalsHTML += `<div class="result-row">
+      <span class="result-label">Wire & Labour Modifier — Estate</span>
+      <span class="result-value" style="color:var(--grey)">Custom — See Steph</span>
+    </div>`;
+  }
+  totalsHTML += `<div class="result-row">
+    <span class="result-label" style="font-family:Montserrat;font-weight:700;font-size:13px;color:var(--dark)">TOTAL ESTIMATE — ${waName}</span>
+    <span class="result-value total">$${Math.round(total).toLocaleString()}</span>
+  </div>`;
+
+  if (finish) {
+    const finishLabel = finish === 'brass' ? 'Brass 2101' : finish === 'black' ? 'Black 2101' : 'Mixed — Confirm per fixture';
+    totalsHTML += `<div class="result-row">
+      <span class="result-label">Fixture Finish</span>
+      <span class="result-value" style="font-size:12px">${finishLabel}</span>
+    </div>`;
+  }
+
+  document.getElementById('totals-section').innerHTML = totalsHTML;
+
+  // SUPPLIES
+  const archQty = activeFixtures.filter(f => f.type === 'architectural' || f.type === 'above-ground').reduce((s,f) => s+f.qty, 0);
+  const landscapeQty = activeFixtures.filter(f => f.type === 'landscape').reduce((s,f) => s+f.qty, 0);
+  const moonlightQty = activeFixtures.filter(f => f.type === 'moonlight').reduce((s,f) => s+f.qty, 0);
+  const allQty = totalFixtures;
+
+  const smallConnectors = (landscapeQty * 2) + (moonlightQty * 2);
+  const largeConnectors = archQty * 2;
+  const heatShrink = (archQty * 2);
+  const screws = archQty * 2;
+  const tapeRolls = Math.ceil(allQty / 20);
+  const valveBoxes = Math.ceil(allQty / 12);
+  const staples = Math.ceil(allQty / 15);
+
+  const suppliesHTML = `
+    <div class="supplies-grid">
+      <div class="supply-item">
+        <div class="supply-name">Small Silicone Connectors</div>
+        <div class="supply-qty">${smallConnectors}</div>
+        <div class="supply-unit">pieces</div>
+      </div>
+      <div class="supply-item">
+        <div class="supply-name">Large Silicone Connectors</div>
+        <div class="supply-qty">${largeConnectors}</div>
+        <div class="supply-unit">pieces</div>
+      </div>
+      <div class="supply-item ${heatShrink === 0 ? 'na' : ''}">
+        <div class="supply-name">Heat Shrink</div>
+        <div class="supply-qty">${heatShrink === 0 ? '—' : heatShrink}</div>
+        <div class="supply-unit">${heatShrink === 0 ? 'N/A — landscape' : 'pieces'}</div>
+      </div>
+      <div class="supply-item ${screws === 0 ? 'na' : ''}">
+        <div class="supply-name">Screws & Hardware</div>
+        <div class="supply-qty">${screws === 0 ? '—' : screws}</div>
+        <div class="supply-unit">${screws === 0 ? 'N/A — landscape' : 'pieces'}</div>
+      </div>
+      <div class="supply-item">
+        <div class="supply-name">Color Coding Tape</div>
+        <div class="supply-qty">${tapeRolls}</div>
+        <div class="supply-unit">${tapeRolls === 1 ? 'roll' : 'rolls'}</div>
+      </div>
+      <div class="supply-item">
+        <div class="supply-name">Valve Boxes</div>
+        <div class="supply-qty">${valveBoxes}</div>
+        <div class="supply-unit">${valveBoxes === 1 ? 'unit' : 'units'}</div>
+      </div>
+      <div class="supply-item">
+        <div class="supply-name">Staple Packs</div>
+        <div class="supply-qty">${staples}</div>
+        <div class="supply-unit">${staples === 1 ? 'pack' : 'packs'}</div>
+      </div>
+    </div>
+    <div class="note-bar">
+      Wood plaque — 1 per job standard &nbsp;·&nbsp;
+      3-to-1 plug — 1 per job standard &nbsp;·&nbsp;
+      Electrical putty — 0.5 unit per job standard
+      ${(waType === 'architectural' || waType === 'mixed') ? ' &nbsp;·&nbsp; Silicone caulking — 1 tube per house, 0.5 per shed or pergola' : ''}
+    </div>
+  `;
+
+  document.getElementById('supplies-output').innerHTML = suppliesHTML;
+
+  // WIRE
+  let wire12;
+  if (allQty <= 10) wire12 = '0.25 roll';
+  else if (allQty <= 20) wire12 = '0.50 roll';
+  else if (allQty <= 40) wire12 = '1.00 roll';
+  else if (allQty <= 80) wire12 = '2.00 rolls';
+  else wire12 = '3.00 rolls';
+
+  const hasShed = +document.getElementById('f6').value > 0;
+  const hasPergola = +document.getElementById('f7').value > 0;
+  const hasHouse = +document.getElementById('f5').value > 0;
+  const moonTrees = +document.getElementById('f8').value > 0 ? Math.ceil(+document.getElementById('f8').value / 2) : 0;
+
+  let wire16Parts = [];
+  if (hasShed) wire16Parts.push('Shed: 0.25 roll');
+  if (hasPergola) wire16Parts.push('Pergola: 0.25 roll');
+  if (hasHouse) wire16Parts.push('House: 0.5–1.0 roll');
+  if (moonTrees > 0) wire16Parts.push(`~${moonTrees} tree(s) with moonlights: ~${moonTrees * 40} ft total`);
+
+  const wireHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="card">
+        <div class="card-title">12/2 Underground Wire</div>
+        <div style="font-family:Montserrat;font-size:22px;font-weight:700;color:var(--blue)">${wire12}</div>
+        <div style="font-size:11px;color:var(--grey);margin-top:4px">Based on ${allQty} total fixtures</div>
+      </div>
+      <div class="card">
+        <div class="card-title">16/2 Above-Ground Wire</div>
+        ${wire16Parts.length > 0
+          ? wire16Parts.map(p => `<div style="font-size:12px;color:var(--dark);padding:4px 0;border-bottom:1px solid var(--border)">${p}</div>`).join('')
+          : '<div style="font-size:12px;color:var(--grey)">No above-ground structures in this work area</div>'
+        }
+      </div>
+    </div>
+  `;
+
+  document.getElementById('wire-output').innerHTML = wireHTML;
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('results-section').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ─── TAB SWITCHING ───────────────────────────────────────────────────────────
+function showTab(name, el) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderPricing('all');
+renderLegend();
+renderBulbs();
+</script>
+</body>
+</html>
